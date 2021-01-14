@@ -4,8 +4,8 @@ const AlipayFormData = require('alipay-sdk/lib/form').default;
 
 const alipaySdk = new AlipaySdk({
     appId:'2021002119669650',
-    privateKey: fs.readFileSync('./AliPay/private-key.pem','ascii'),
-    //alipayPublicKey: fs.readFileSync('./public-key.pem', 'ascii'),
+    privateKey: fs.readFileSync('./AliPay/rsa_private_key.pem','ascii'),
+    alipayPublicKey: fs.readFileSync('./AliPay/rsa_public_key.pem', 'ascii'),
 	sign_type: 'RSA2',
 	charset: 'utf-8'
 
