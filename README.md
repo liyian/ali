@@ -1,3 +1,3 @@
-# node.js koa project for miniprogram backend API
+ node.js koa project for miniprogram backend API
 
-# run nodemon app.js to start 
+ run nodemon app.js to start 
