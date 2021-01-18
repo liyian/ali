@@ -1,6 +1,7 @@
 var fs = require('fs')
 let AlipaySdk = require("alipay-sdk").default;
 const AlipayFormData = require('alipay-sdk/lib/form').default;
+const koa2Req = require('koa2-request')
 
 const alipaySdk = new AlipaySdk({
     appId:'2021002119669650',
@@ -26,47 +27,28 @@ class aliplayApi {
 	?	  userId: '2088041230814063'
 		}
    */
-  static async accToken(code) {
-    console.log("code token", code);
-    try {
-      let params = {
-        grantType: 'authorization_code',
-        code,
-      };
-      let options = {};
-      let r1 = await alipaySdk.exec("alipay.system.oauth.token", params, options);
-      console.log('token',r1)
+	static async accToken(code) {
+	console.log("code token", code);
+	try {
+	  let params = {
+		grantType: 'authorization_code',
+		code,
+	  };
+	  let options = {};
+	  let r1 = await alipaySdk.exec("alipay.system.oauth.token", params, options);
+	  console.log('token',r1)
 	  //TODO: store token and id in a session
 	  return r1;
-    }
-    catch (e) {
-      console.log('get access token error:'+Object.keys(e)+Object.values(e));
-    }
-  }
-
-  //  /**
-  //  * get detailed user info
-  //  * @param {obj} param0 
-  //  */
-  //   static async userInfo({accessToken}) {
-		// try {
-		//   let params = {
-		// 	auth_token: accessToken
-		//   };
-		//   let options = {};
-		//   let r1 = await alipaySdk.exec("alipay.user.info.share", params, options);
-		//   console.log('User info returned:',r1)
-		//   return r1;
-		// }
-		// catch (e) {
-		//   console.log(e);
-		// }
-  //   }
+	}
+	catch (e) {
+	  console.log('get access token error:'+Object.keys(e)+Object.values(e));
+	}
+	}
 	
-	static async payment(totalAmount, subject ){
+	static async payment(totalAmount, subject,buyer_id){ 
 		const formData = new AlipayFormData();
 		formData.setMethod('get');
-		formData.addField('notifyUrl', 'https://test.*****.com/my_callback');
+		formData.addField('notifyUrl', 'https://edflabschina.cn:5758/aliPay/my_callback');
 		formData.addField('bizContent', {
 		  outTradeNo: 'T232222222', 
 		  totalAmount: totalAmount,  //'1.00' must be string
@@ -75,13 +57,26 @@ class aliplayApi {
 		});
 		const payUrl = await alipaySdk.exec('alipay.trade.create', {}, { formData: formData });
 		// * exec return an callback url, we must send http request to get the ali server response 
-		const response = await utils.httpGetSync(payUrl);
-		// check sign
+		console.log(payUrl)
+		var options = {
+		    method: 'get',
+		    url: payUrl,
+			headers: {
+			      'Content-Type': 'application/json',
+			      'Accept': 'application/json'
+			    },
+		}
+		var response = await koa2Req(payUrl)
+		console.log(response.body)
+		response = response.body
+		
+		//check sign
 		if (!alipaySdk.checkResponseSign(response, 'alipay_trade_create_response')) {
 		  throw new Error('payment failed');
 		}
 		const { alipay_trade_create_response: res, sign } = JSON.parse(response);
-		return alipay_trade_create_response
+	
+		return res
 		logger.info('services.order.createMyOrder res=', res);
 	}
 };
