@@ -47,10 +47,11 @@ class aliplayApi {
 	
 	static async payment(totalAmount, subject,buyer_id){ 
 		const formData = new AlipayFormData();
+		var orderNo = await this.__randomNumber()
 		formData.setMethod('get');
 		formData.addField('notifyUrl', 'https://edflabschina.cn:5758/aliPay/my_callback');
 		formData.addField('bizContent', {
-		  outTradeNo: 'T232222222', 
+		  outTradeNo: orderNo, 
 		  totalAmount: totalAmount,  //'1.00' must be string
 		  subject: subject,
 		  buyer_id: buyer_id //user_id *required otherwise get invalid param error
@@ -78,6 +79,23 @@ class aliplayApi {
 	
 		return res
 		logger.info('services.order.createMyOrder res=', res);
+	}
+	static async __randomNumber() {
+	    const now = new Date()
+	    let month = now.getMonth() + 1
+	    let day = now.getDate()
+	    let hour = now.getHours()
+	    let minutes = now.getMinutes()
+	    let seconds = now.getSeconds()
+	    month = await this.setTimeDateFmt(month)
+	    hour = await this.setTimeDateFmt(hour)
+	    minutes = await this.setTimeDateFmt(minutes)
+	    seconds = await this.setTimeDateFmt(seconds)
+	    return now.getFullYear().toString() + month.toString() + day + hour + minutes + seconds + (Math.round(Math.random() * 89 + 100)).toString()
+	   }
+	
+	static async setTimeDateFmt(s) {  // 个位数补齐十位数
+	  return s < 10 ? '0' + s : s;
 	}
 };
 
